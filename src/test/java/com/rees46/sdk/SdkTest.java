@@ -17,13 +17,15 @@ import com.rees46.sdk.data.UserInfo;
 
 public class SdkTest extends TestCase {
 	private Sdk sdk;
+	private UUID generatedSsid;
 
-	public SdkTest(String testName) {
+	public SdkTest(String testName) throws IOException {
 		super(testName);
 		String shopCode = System.getenv("REES46_SHOP_CODE");
 		assertTrue(shopCode != null);
 
 		sdk = new Sdk(shopCode);
+		generatedSsid = sdk.generateSSID();
 	}
 
 	public static Test suite() {
@@ -35,7 +37,6 @@ public class SdkTest extends TestCase {
 	}
 
 	public void testTrackPurchase() throws IOException {
-		UUID generatedSsid = sdk.generateSSID();
 		assertNotNull(generatedSsid);
 
 		UserInfo userInfo = createTestUserInfo();
@@ -45,7 +46,6 @@ public class SdkTest extends TestCase {
 	}
 
 	public void testTrackView() throws IOException {
-		UUID generatedSsid = sdk.generateSSID();
 		assertNotNull(generatedSsid);
 
 		UserInfo userInfo = createTestUserInfo();
@@ -55,7 +55,6 @@ public class SdkTest extends TestCase {
 	}
 
 	public void testTrackCart() throws IOException {
-		UUID generatedSsid = sdk.generateSSID();
 		assertNotNull(generatedSsid);
 
 		UserInfo userInfo = createTestUserInfo();
@@ -65,7 +64,6 @@ public class SdkTest extends TestCase {
 	}
 
 	public void testTrackRemoveFromCart() throws IOException {
-		UUID generatedSsid = sdk.generateSSID();
 		assertNotNull(generatedSsid);
 
 		UserInfo userInfo = createTestUserInfo();
