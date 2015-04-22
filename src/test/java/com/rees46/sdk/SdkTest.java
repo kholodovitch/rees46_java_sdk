@@ -8,6 +8,8 @@ import junit.framework.Test;
 import junit.framework.TestCase;
 import junit.framework.TestSuite;
 
+import com.rees46.sdk.data.EventData;
+import com.rees46.sdk.data.EventType;
 import com.rees46.sdk.data.Order;
 import com.rees46.sdk.data.OrderItem;
 import com.rees46.sdk.data.PurchaseData;
@@ -36,14 +38,40 @@ public class SdkTest extends TestCase {
 		UUID generatedSsid = sdk.generateSSID();
 		assertNotNull(generatedSsid);
 
-		UserInfo userInfo = new UserInfo();
-		userInfo.setUserId(new UUID(0, 1).toString());
-		userInfo.setUserEmail("kholodovitch@gmail.com");
-
-		PurchaseData[] eventDataArray = new PurchaseData[2];
-		eventDataArray[0] = new PurchaseData(new UUID(0, 2).toString(), 0f, true, new String[] { new UUID(1000, 1).toString() }, 1);
-		eventDataArray[1] = new PurchaseData(new UUID(0, 3).toString(), 0f, true, new String[] { new UUID(1000, 1).toString() }, 1);
+		UserInfo userInfo = createTestUserInfo();
+		PurchaseData[] eventDataArray = new PurchaseData[1];
+		eventDataArray[0] = getGoodItem();
 		assertTrue(sdk.trackPurchase(generatedSsid, userInfo, eventDataArray, UUID.randomUUID().toString()));
+	}
+
+	public void testTrackView() throws IOException {
+		UUID generatedSsid = sdk.generateSSID();
+		assertNotNull(generatedSsid);
+
+		UserInfo userInfo = createTestUserInfo();
+		EventData[] eventDataArray = new EventData[1];
+		eventDataArray[0] = getBadItem();
+		assertTrue(sdk.track(EventType.view, generatedSsid, userInfo, eventDataArray));
+	}
+
+	public void testTrackCart() throws IOException {
+		UUID generatedSsid = sdk.generateSSID();
+		assertNotNull(generatedSsid);
+
+		UserInfo userInfo = createTestUserInfo();
+		EventData[] eventDataArray = new EventData[1];
+		eventDataArray[0] = getBadItem();
+		assertTrue(sdk.track(EventType.cart, generatedSsid, userInfo, eventDataArray));
+	}
+
+	public void testTrackRemoveFromCart() throws IOException {
+		UUID generatedSsid = sdk.generateSSID();
+		assertNotNull(generatedSsid);
+
+		UserInfo userInfo = createTestUserInfo();
+		EventData[] eventDataArray = new EventData[1];
+		eventDataArray[0] = getBadItem();
+		assertTrue(sdk.track(EventType.remove_from_cart, generatedSsid, userInfo, eventDataArray));
 	}
 
 	public void testImportOrders() throws IOException {
@@ -64,5 +92,20 @@ public class SdkTest extends TestCase {
 		orders[0].setUserId(new UUID(0, 1).toString());
 		orders[0].setItems(items);
 		assertTrue(sdk.importOrders(orders));
+	}
+
+	private UserInfo createTestUserInfo() {
+		UserInfo userInfo = new UserInfo();
+		userInfo.setUserId(new UUID(0, 1).toString());
+		userInfo.setUserEmail("kholodovitch@gmail.com");
+		return userInfo;
+	}
+
+	private PurchaseData getGoodItem() {
+		return new PurchaseData(new UUID(0, 2).toString(), 0f, true, new String[] { new UUID(1000, 1).toString() }, 1);
+	}
+
+	private EventData getBadItem() {
+		return new EventData(new UUID(0, 4).toString(), 0f, true, new String[] { new UUID(1000, 1).toString() });
 	}
 }
