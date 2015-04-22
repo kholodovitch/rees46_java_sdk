@@ -33,7 +33,7 @@ import com.rees46.sdk.data.UserInfo;
 
 public class Sdk {
 	private final String UrlImportOrders = "http://api.rees46.com/import/orders";
-	private final String UrlPush = "http://api.rees46.com/push";
+	private final String UrlBase = "http://api.rees46.com/";
 
 	private String shopCode;
 	private String shopSecretKey;
@@ -63,6 +63,19 @@ public class Sdk {
 		}
 
 		return false;
+	}
+
+	public UUID generateSSID() throws IOException {
+		HttpURLConnection conn = get(UrlBase + "generate_ssid" + "?shop_id=" + shopCode);
+
+		int status = conn.getResponseCode();
+		if (status == 200) {
+			String responseBody = getAndClose(conn.getInputStream());
+			if (responseBody != null && responseBody.length() == 36)
+				return UUID.fromString(responseBody);
+		}
+
+		return null;
 	}
 
 	public boolean trackPurchase(UUID sessionId, UserInfo user_info, PurchaseData[] eventDataArray, String order_id) throws IOException {
@@ -117,7 +130,7 @@ public class Sdk {
 	}
 
 	private boolean processPushEvent(Map<String, String> fields) throws IOException {
-		String res = post(UrlPush, fields);
+		String res = post(UrlBase + "push", fields);
 		System.out.println(res);
 		return false;
 	}
@@ -146,6 +159,18 @@ public class Sdk {
 			}
 		}
 		return null;
+	}
+
+	protected HttpURLConnection get(String url) throws IOException {
+		if (url == null)
+			throw new IllegalArgumentException("arguments cannot be null");
+
+		HttpURLConnection conn = getConnection(url);
+
+		conn.setDoOutput(true);
+		conn.setUseCaches(false);
+		conn.setRequestMethod("GET");
+		return conn;
 	}
 
 	protected HttpURLConnection post(String url, String contentType, String body) throws IOException {

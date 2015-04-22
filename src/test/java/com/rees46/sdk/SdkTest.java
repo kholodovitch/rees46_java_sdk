@@ -26,7 +26,11 @@ public class SdkTest extends TestCase {
 		return new TestSuite(SdkTest.class);
 	}
 
-	public void testApp() throws IOException {
+	public void testGenedateSsid() throws IOException {
+		assertNotNull(sdk.generateSSID());
+	}
+
+	public void testImportOrders() throws IOException {
 		String shopSecretKey = System.getenv("REES46_SHOP_SECRET_KEY");
 		assertTrue(shopSecretKey != null);
 		sdk.setShopSecretKey(shopSecretKey);
