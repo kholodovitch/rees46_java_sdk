@@ -96,7 +96,7 @@ public class Sdk {
 	}
 
 	public boolean track(EventType event, UUID sessionId, UserInfo user_info, EventData[] eventDataArray) throws IOException {
-		Map<String, String> fields = prepareTrackData(EventType.purchase, sessionId, user_info, eventDataArray);
+		Map<String, String> fields = prepareTrackData(event, sessionId, user_info, eventDataArray);
 
 		return processPushEvent(fields);
 	}
