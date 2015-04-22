@@ -8,13 +8,19 @@ import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.util.UUID;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.rees46.sdk.data.EventData;
+import com.rees46.sdk.data.EventType;
 import com.rees46.sdk.data.Order;
 import com.rees46.sdk.data.Orders;
+import com.rees46.sdk.data.PurchaseData;
+import com.rees46.sdk.data.UserInfo;
 
 public class Sdk {
 	private final String UrlImportOrders = "http://api.rees46.com/import/orders";
+	private final String UrlPush = "http://api.rees46.com/push";
 
 	private String shopCode;
 	private String shopSecretKey;
@@ -40,10 +46,17 @@ public class Sdk {
 		int status = conn.getResponseCode();
 		if (status == 200) {
 			String responseBody = getAndClose(conn.getInputStream());
-			System.out.println(responseBody);
-			return true;
+			return "OK".equals(responseBody);
 		}
 
+		return false;
+	}
+
+	public boolean trackPurchase(UUID sessionId, UserInfo user_info, PurchaseData[] eventData, String order_id) throws IOException {
+		return trackEvent(EventType.purchase, sessionId, user_info, eventData, order_id);
+	}
+
+	public boolean trackEvent(EventType event, UUID sessionId, UserInfo user_info, EventData[] eventData, String order_id) throws IOException {
 		return false;
 	}
 
@@ -75,9 +88,9 @@ public class Sdk {
 	}
 
 	protected static String getString(InputStream stream) throws IOException {
-		if (stream == null) {
+		if (stream == null)
 			return "";
-		}
+
 		BufferedReader reader = new BufferedReader(new InputStreamReader(stream));
 		StringBuilder content = new StringBuilder();
 		String newLine;
