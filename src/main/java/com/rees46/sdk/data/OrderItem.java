@@ -4,9 +4,9 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 
 public class OrderItem {
 	@JsonProperty("id")
-	private Integer id;
+	private String id;
 	@JsonProperty("price")
-	private Integer price;
+	private String price;
 	@JsonProperty("categories")
 	private String[] categories;
 	@JsonProperty("is_available")
@@ -14,19 +14,19 @@ public class OrderItem {
 	@JsonProperty("amount")
 	private Integer amount;
 
-	public Integer getId() {
+	public String getId() {
 		return id;
 	}
 
-	public void setId(Integer id) {
+	public void setId(String id) {
 		this.id = id;
 	}
 
-	public Integer getPrice() {
+	public String getPrice() {
 		return price;
 	}
 
-	public void setPrice(Integer price) {
+	public void setPrice(String price) {
 		this.price = price;
 	}
 

@@ -6,9 +6,9 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 
 public class Order {
 	@JsonProperty("id")
-	private Integer id;
+	private String id;
 	@JsonProperty("user_id")
-	private Integer userId;
+	private String userId;
 	@JsonProperty("user_email")
 	private String userEmail;
 	@JsonProperty("date")
@@ -16,19 +16,19 @@ public class Order {
 	@JsonProperty("items")
 	private OrderItem[] items;
 
-	public Integer getId() {
+	public String getId() {
 		return id;
 	}
 
-	public void setId(Integer id) {
+	public void setId(String id) {
 		this.id = id;
 	}
 
-	public Integer getUserId() {
+	public String getUserId() {
 		return userId;
 	}
 
-	public void setUserId(Integer userId) {
+	public void setUserId(String userId) {
 		this.userId = userId;
 	}
 
