@@ -2,17 +2,26 @@ package com.rees46.sdk.data;
 
 import java.util.Date;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonInclude.Include;
 
 public class Order {
 	@JsonProperty("id")
+	@JsonInclude(Include.NON_NULL)
 	private String id;
+
 	@JsonProperty("user_id")
+	@JsonInclude(Include.NON_NULL)
 	private String userId;
+
 	@JsonProperty("user_email")
+	@JsonInclude(Include.NON_NULL)
 	private String userEmail;
+
 	@JsonProperty("date")
-	private Date date;
+	private long date;
+
 	@JsonProperty("items")
 	private OrderItem[] items;
 
@@ -40,11 +49,14 @@ public class Order {
 		this.userEmail = userEmail;
 	}
 
-	public Date getDate() {
+	public long getDate() {
 		return date;
 	}
 
-	public void setDate(Date date) {
+	public void setDate(long date) {
+		if (date > 95617584000000L)
+			throw new RuntimeException("Too large time value. Time must be in seconds.");
+
 		this.date = date;
 	}
 

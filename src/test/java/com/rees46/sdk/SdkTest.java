@@ -81,11 +81,12 @@ public class SdkTest extends TestCase {
 		items[0] = new OrderItem();
 		items[0].setId(new UUID(0, 2).toString());
 		items[0].setAmount(1);
-		items[0].setPrice("0");
+		items[0].setPrice(1F);
+		items[0].setIsAvailable(true);
 
 		Order[] orders = new Order[1];
 		orders[0] = new Order();
-		orders[0].setDate(new Date());
+		orders[0].setDate(new Date().getTime() / 1000);
 		orders[0].setId(new UUID(1, 1).toString());
 		orders[0].setUserId(new UUID(0, 1).toString());
 		orders[0].setItems(items);
