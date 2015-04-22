@@ -30,6 +30,7 @@ import com.rees46.sdk.data.Order;
 import com.rees46.sdk.data.Orders;
 import com.rees46.sdk.data.PurchaseData;
 import com.rees46.sdk.data.UserInfo;
+import com.rees46.sdk.data.internal.ApiResult;
 
 public class Sdk {
 	private final String UrlImportOrders = "http://api.rees46.com/import/orders";
@@ -131,7 +132,14 @@ public class Sdk {
 
 	private boolean processPushEvent(Map<String, String> fields) throws IOException {
 		String res = post(UrlBase + "push", fields);
-		System.out.println(res);
+		if (res != null) {
+			try {
+				ObjectMapper mapper = new ObjectMapper();
+				ApiResult resObj = mapper.readValue(res, ApiResult.class);
+				return "success".equals(resObj.getStatus());
+			} catch (Exception e) {
+			}
+		}
 		return false;
 	}
 
