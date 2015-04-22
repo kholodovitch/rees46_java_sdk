@@ -8,7 +8,20 @@ import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.util.ArrayList;
+import java.util.Hashtable;
+import java.util.List;
+import java.util.Map;
 import java.util.UUID;
+
+import org.apache.http.HttpEntity;
+import org.apache.http.HttpResponse;
+import org.apache.http.NameValuePair;
+import org.apache.http.client.HttpClient;
+import org.apache.http.client.entity.UrlEncodedFormEntity;
+import org.apache.http.client.methods.HttpPost;
+import org.apache.http.impl.client.HttpClients;
+import org.apache.http.message.BasicNameValuePair;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.rees46.sdk.data.EventData;
@@ -52,12 +65,87 @@ public class Sdk {
 		return false;
 	}
 
-	public boolean trackPurchase(UUID sessionId, UserInfo user_info, PurchaseData[] eventData, String order_id) throws IOException {
-		return trackEvent(EventType.purchase, sessionId, user_info, eventData, order_id);
+	public boolean trackPurchase(UUID sessionId, UserInfo user_info, PurchaseData[] eventDataArray, String order_id) throws IOException {
+		Map<String, String> fields = prepareTrackData(EventType.purchase, sessionId, user_info, eventDataArray);
+
+		if (order_id != null)
+			fields.put("order_id", order_id);
+
+		for (int i = 0; i < eventDataArray.length; i++) {
+			PurchaseData eventData = eventDataArray[i];
+			String indexStr = "[" + i + "]";
+			if (eventData.getAmount() != null)
+				fields.put("amount" + indexStr, Integer.toString(eventData.getAmount()));
+		}
+
+		return processPushEvent(fields);
 	}
 
-	public boolean trackEvent(EventType event, UUID sessionId, UserInfo user_info, EventData[] eventData, String order_id) throws IOException {
+	public boolean track(EventType event, UUID sessionId, UserInfo user_info, EventData[] eventDataArray) throws IOException {
+		Map<String, String> fields = prepareTrackData(EventType.purchase, sessionId, user_info, eventDataArray);
+
+		return processPushEvent(fields);
+	}
+
+	protected Map<String, String> prepareTrackData(EventType event, UUID sessionId, UserInfo user_info, EventData[] eventDataArray) throws IOException {
+		Map<String, String> paramsInput = new Hashtable<String, String>();
+		paramsInput.put("event", event.toString());
+		paramsInput.put("shop_id", shopCode);
+		paramsInput.put("ssid", sessionId.toString());
+
+		if (user_info != null) {
+			if (user_info.getUserId() != null)
+				paramsInput.put("user_id", user_info.getUserId());
+
+			if (user_info.getUserEmail() != null)
+				paramsInput.put("user_email", user_info.getUserEmail());
+		}
+
+		for (int i = 0; i < eventDataArray.length; i++) {
+			EventData eventData = eventDataArray[i];
+			String indexStr = "[" + i + "]";
+			if (eventData.getItemId() != null)
+				paramsInput.put("item_id" + indexStr, eventData.getItemId());
+			if (eventData.getPrice() != null)
+				paramsInput.put("price" + indexStr, Float.toString(eventData.getPrice()));
+			if (eventData.getIsAvailable() != null)
+				paramsInput.put("is_available" + indexStr, Boolean.toString(eventData.getIsAvailable()));
+			if (eventData.getCategories() != null)
+				paramsInput.put("categories" + indexStr, joinStrings(eventData.getCategories(), ","));
+		}
+		return paramsInput;
+	}
+
+	private boolean processPushEvent(Map<String, String> fields) throws IOException {
+		String res = post(UrlPush, fields);
+		System.out.println(res);
 		return false;
+	}
+
+	protected String post(String url, Map<String, String> paramsInput) throws IOException {
+		HttpClient httpclient = HttpClients.createDefault();
+		HttpPost httppost = new HttpPost(url);
+
+		List<NameValuePair> params = new ArrayList<NameValuePair>(paramsInput.size());
+		for (String key : paramsInput.keySet())
+			params.add(new BasicNameValuePair(key, paramsInput.get(key)));
+		httppost.setEntity(new UrlEncodedFormEntity(params, "UTF-8"));
+
+		// Execute and get the response.
+		HttpResponse response = httpclient.execute(httppost);
+		if (response.getStatusLine().getStatusCode() == 200) {
+			HttpEntity entity = response.getEntity();
+
+			if (entity != null) {
+				InputStream instream = entity.getContent();
+				try {
+					return getAndClose(instream);
+				} finally {
+					instream.close();
+				}
+			}
+		}
+		return null;
 	}
 
 	protected HttpURLConnection post(String url, String contentType, String body) throws IOException {
@@ -125,5 +213,15 @@ public class Sdk {
 				// ignore error
 			}
 		}
+	}
+
+	private String joinStrings(String[] categories, String splitter) {
+		StringBuilder builder = new StringBuilder();
+		for (int i = 0; i < categories.length; i++) {
+			if (i != 0)
+				builder.append(splitter);
+			builder.append(categories[i]);
+		}
+		return builder.toString();
 	}
 }
